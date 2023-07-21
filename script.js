@@ -6,8 +6,8 @@ let rand = function (min, max) {
     return (Math.round(k / s) * s);
 }
 
-let newApple = function () {
-    return [rand(0, innerWidth), rand(0, innerHeight)];
+let newApple = function (fieldWidth, fieldHeight) {
+    return [rand(0, fieldWidth), rand(0, fieldHeight)];
 }
 
 let newBody = function () {
@@ -17,8 +17,11 @@ let newBody = function () {
 let gameField = document.getElementById('snake_game'),
     g = gameField.getContext('2d'),
     snakeBody = newBody(),
-    dir = directions.RIGHT,
-    apple = newApple();
+    dir = directions.RIGHT;
+
+gameField.width = 450;
+gameField.height = 450;
+let apple = newApple(gameField.width, gameField.height);
 
 let handleClick = function (e) {
     let key = e.keyCode;
@@ -38,8 +41,6 @@ let handleClick = function (e) {
 
 }
 
-gameField.width = innerWidth;
-gameField.height = innerHeight;
 gameField.style.border = '1px solid black';
 
 let redraw = function (timeout, s) {
@@ -48,22 +49,33 @@ let redraw = function (timeout, s) {
         g.clearRect(0, 0, gameField.width, gameField.height);
         g.fillStyle = '#F00';
         g.fillRect(...apple, s, s);
+
         g.fillStyle = '#000';
         let last = snakeBody.length - 1;
-
+        let action = {x: 0, y: 0};
         if (dir === directions.RIGHT) {
-            snakeBody[last].x = snakeBody[0].x + s;
-            snakeBody[last].y = snakeBody[0].y;
+            action.x = snakeBody[0].x + s;
+            action.y = snakeBody[0].y;
         } else if (dir === directions.BOTTOM) {
-            snakeBody[last].x = snakeBody[0].x;
-            snakeBody[last].y = snakeBody[0].y + s;
+            action.x = snakeBody[0].x;
+            action.y = snakeBody[0].y + s;
         } else if (dir === directions.LEFT) {
-            snakeBody[last].x = snakeBody[0].x - s;
-            snakeBody[last].y = snakeBody[0].y;
+            action.x = snakeBody[0].x - s;
+            action.y = snakeBody[0].y;
         } else if (dir === directions.TOP) {
-            snakeBody[last].x = snakeBody[0].x;
-            snakeBody[last].y = snakeBody[0].y - s;
+            action.x = snakeBody[0].x;
+            action.y = snakeBody[0].y - s;
         }
+
+        // changing snake position
+        snakeBody.push(action);
+        // checking apple and snake positions
+        if (!(snakeBody[0].x === apple.x && snakeBody[0].y === apple.y)) {
+            snakeBody.shift();
+        } else if (snakeBody[0].x === apple.x && snakeBody[0].y === apple.y) {
+            debugger;
+        }
+
         snakeBody.forEach((el, index) => {
             if (apple[0] + s >= gameField.width || apple[1] + s >= gameField.height) {
                 apple = newApple();
@@ -88,7 +100,7 @@ let redraw = function (timeout, s) {
 }
 
 let gameStart = function () {
-    let timeout = 60;
+    let timeout = 100;
     let s = 30;
     redraw(timeout, s);
 }

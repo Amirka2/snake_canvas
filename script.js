@@ -1,5 +1,5 @@
 const directions = {RIGHT: 0, BOTTOM: 1, LEFT: 2, TOP: 3};
-
+let dir = directions.RIGHT;
 let rand = function (min, max) {
     let s = 30;
     k = Math.floor(Math.random() * (max - min) + min);
@@ -13,15 +13,6 @@ let newApple = function (fieldWidth, fieldHeight) {
 let newBody = function () {
     return [{x: 0, y: 0}];
 }
-
-let gameField = document.getElementById('snake_game'),
-    g = gameField.getContext('2d'),
-    snakeBody = newBody(),
-    dir = directions.RIGHT;
-
-gameField.width = 450;
-gameField.height = 450;
-let apple = newApple(gameField.width, gameField.height);
 
 let handleClick = function (e) {
     let key = e.keyCode;
@@ -41,15 +32,13 @@ let handleClick = function (e) {
 
 }
 
-gameField.style.border = '1px solid black';
-
-let redraw = function (timeout, s) {
+let redraw = function (gameField, snakeBody, apple, timeout, s) {
+    let g = gameField.getContext('2d');
     addEventListener('keydown', e => handleClick(e))
     setInterval(() => {
         g.clearRect(0, 0, gameField.width, gameField.height);
         g.fillStyle = '#F00';
         g.fillRect(...apple, s, s);
-
         g.fillStyle = '#000';
         let last = snakeBody.length - 1;
         let action = {x: 0, y: 0};
@@ -73,7 +62,6 @@ let redraw = function (timeout, s) {
         if (!(snakeBody[0].x === apple.x && snakeBody[0].y === apple.y)) {
             snakeBody.shift();
         } else if (snakeBody[0].x === apple.x && snakeBody[0].y === apple.y) {
-            debugger;
         }
 
         snakeBody.forEach((el, index) => {
@@ -100,9 +88,16 @@ let redraw = function (timeout, s) {
 }
 
 let gameStart = function () {
+    let gameField = document.getElementById('snake_game'),
+        snakeBody = newBody();
+
+    gameField.width = 450;
+    gameField.height = 450;
+    gameField.style.border = '1px solid black';
+    let apple = newApple(gameField.width, gameField.height);
     let timeout = 100;
     let s = 30;
-    redraw(timeout, s);
+    redraw(gameField, snakeBody, apple, timeout, s);
 }
 
 let gameEnd = function () {

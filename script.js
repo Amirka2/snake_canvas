@@ -30,17 +30,32 @@ let redraw = function(timeout, s) {
         g.fillStyle = '#F00';
         g.fillRect(...apple, s, s);
         g.fillStyle = '#000';
+        let last = snakeBody.length - 1;
+
+        if (dir === directions.RIGHT) {
+            snakeBody[last].x = snakeBody[0].x + 1;
+            snakeBody[last].y = snakeBody[0].y;
+        } else if (dir === directions.BOTTOM) {
+            snakeBody[last].x = snakeBody[0].x;
+            snakeBody[last].y = snakeBody[0].y + 1;
+        } else if (dir === directions.LEFT) {
+            snakeBody[last].x = snakeBody[0].x - 1;
+            snakeBody[last].y = snakeBody[0].y;
+        } else if (dir === directions.TOP) {
+            snakeBody[last].x = snakeBody[0].x;
+            snakeBody[last].y = snakeBody[0].y - 1;
+        }
         snakeBody.forEach((el, index) => {
             if (apple[0] + s >= gameField.width || apple[1] + s >= gameField.height) {
                 apple = newApple();
             }
-            let last = snakeBody.length - 1;
             if (el.x === snakeBody[last].x && el.y === snakeBody[last].y && index !== last) {
                 gameEnd();
             }
+
+            g.fillRect(el.x, el.y, s, s);
         })
-        g.fillRect(snakeBody[0].x, snakeBody[0].y, s, s);
-        console.log('redrawing')
+
     }, timeout);
 }
 

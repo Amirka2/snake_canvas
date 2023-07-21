@@ -7,7 +7,7 @@ let rand = function (min, max) {
 }
 
 let newApple = function (fieldWidth, fieldHeight) {
-    return [rand(0, fieldWidth), rand(0, fieldHeight)];
+    return { x: rand(0, fieldWidth), y: rand(0, fieldHeight)};
 }
 
 let newBody = function () {
@@ -38,7 +38,7 @@ let redraw = function (gameField, snakeBody, apple, timeout, s) {
     setInterval(() => {
         g.clearRect(0, 0, gameField.width, gameField.height);
         g.fillStyle = '#F00';
-        g.fillRect(...apple, s, s);
+        g.fillRect(apple.x, apple.y, s, s);
         g.fillStyle = '#000';
         let last = snakeBody.length - 1;
         let action = {x: 0, y: 0};
@@ -55,13 +55,14 @@ let redraw = function (gameField, snakeBody, apple, timeout, s) {
             action.x = snakeBody[0].x;
             action.y = snakeBody[0].y - s;
         }
-
         // changing snake position
         snakeBody.push(action);
         // checking apple and snake positions
         if (!(snakeBody[0].x === apple.x && snakeBody[0].y === apple.y)) {
             snakeBody.shift();
-        } else if (snakeBody[0].x === apple.x && snakeBody[0].y === apple.y) {
+        }
+        if (snakeBody[0].x === apple.x && snakeBody[0].y === apple.y) {
+            debugger;
         }
 
         snakeBody.forEach((el, index) => {

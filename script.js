@@ -12,10 +12,12 @@ let newBody = function() {
     return [{x: 0, y: 0}];
 }
 
-var gameField = document.getElementById('snake_game'),
+const directions = { RIGHT: 0, BOTTOM: 1, LEFT: 2, TOP: 3};
+
+let gameField = document.getElementById('snake_game'),
     g = gameField.getContext('2d'),
     snakeBody = newBody(),
-    dir = 1,
+    dir = directions.RIGHT,
     apple = newApple();
 
 

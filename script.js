@@ -23,7 +23,7 @@ let gameField = document.getElementById('snake_game'),
 
 gameField.width = innerWidth;
 gameField.height = innerHeight;
-
+gameField.style.border = '1px solid black';
 let redraw = function(timeout, s) {
     setInterval(() => {
         g.clearRect(0, 0, gameField.width, gameField.height);

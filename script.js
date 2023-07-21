@@ -25,19 +25,15 @@ let handleClick = function (e) {
     if ([37, 38, 39, 40].indexOf(key) >= 0) e.preventDefault();
     if (key === 37 && dir !== directions.RIGHT) {
         dir = directions.LEFT;
-        console.log('LEFT');
     }
      if (key === 38 && dir !== directions.BOTTOM) {
         dir = directions.TOP;
-        console.log('TOP');
     }
      if (key === 39 && dir !== directions.LEFT) {
         dir = directions.RIGHT;
-        console.log('RIGHT');
     }
      if (key === 40 && dir !== directions.TOP) {
         dir = directions.BOTTOM;
-        console.log('BOTTOM');
     }
 
 }

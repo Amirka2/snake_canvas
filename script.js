@@ -1,14 +1,15 @@
 const directions = {RIGHT: 0, BOTTOM: 1, LEFT: 2, TOP: 3};
 let dir = directions.RIGHT;
+const s = 30;
 let rand = function (min, max) {
-    let s = 30;
     k = Math.floor(Math.random() * (max - min) + min);
-    return (Math.round(k / s) * s);
+    return (Math.floor(k / s) * s);
 }
 
 let newApple = function (fieldWidth, fieldHeight) {
-    return { x: rand(0, fieldWidth), y: rand(0, fieldHeight)};
+    return { x: rand(0, fieldWidth - s), y: rand(0, fieldHeight - s)};
 }
+
 
 let newBody = function () {
     return [{x: 0, y: 0}];
@@ -33,6 +34,7 @@ let handleClick = function (e) {
 }
 
 let redraw = function (gameField, snakeBody, apple, timeout, s) {
+    console.log('apple: ' + apple.x + '; ' + apple.y);
     let g = gameField.getContext('2d');
     addEventListener('keydown', e => handleClick(e))
     setInterval(() => {
@@ -56,28 +58,31 @@ let redraw = function (gameField, snakeBody, apple, timeout, s) {
             action.y = snakeBody[0].y - s;
         }
         // changing snake position
-        snakeBody.push(action);
+        snakeBody.unshift(action);
         // checking apple and snake positions
         if (!(snakeBody[0].x === apple.x && snakeBody[0].y === apple.y)) {
-            snakeBody.shift();
+            snakeBody.pop();
         }
         if (snakeBody[0].x === apple.x && snakeBody[0].y === apple.y) {
-            debugger;
+            apple = newApple(gameField.width, gameField.height);
+            g.fillStyle = '#F00';
+            g.fillRect(apple.x, apple.y, s, s);
+            g.fillStyle = '#000';
+            console.log('apple: ' + apple.x + '; ' + apple.y);
         }
 
         snakeBody.forEach((el, index) => {
-            if (apple[0] + s >= gameField.width || apple[1] + s >= gameField.height) {
-                apple = newApple();
-            }
             if (el.x === snakeBody[last].x && el.y === snakeBody[last].y && index !== last) {
+                console.log(el, snakeBody);
+
                 gameEnd();
             }
-            if (el.x > gameField.width) {
+            if (el.x >= gameField.width) {
                 el.x = 0;
             } else if (el.x < 0) {
                 el.x = gameField.width;
             }
-            if (el.y > gameField.height) {
+            if (el.y >= gameField.height) {
                 el.y = 0;
             } else if (el.y < 0) {
                 el.y = gameField.height;

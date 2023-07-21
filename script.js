@@ -20,11 +20,34 @@ let gameField = document.getElementById('snake_game'),
     dir = directions.RIGHT,
     apple = newApple();
 
+let handleClick = function (e) {
+    let key = e.keyCode;
+    if ([37, 38, 39, 40].indexOf(key) >= 0) e.preventDefault();
+    if (key === 37 && dir !== directions.RIGHT) {
+        dir = directions.LEFT;
+        console.log('LEFT');
+    }
+     if (key === 38 && dir !== directions.BOTTOM) {
+        dir = directions.TOP;
+        console.log('TOP');
+    }
+     if (key === 39 && dir !== directions.LEFT) {
+        dir = directions.RIGHT;
+        console.log('RIGHT');
+    }
+     if (key === 40 && dir !== directions.TOP) {
+        dir = directions.BOTTOM;
+        console.log('BOTTOM');
+    }
+
+}
+
 gameField.width = innerWidth;
 gameField.height = innerHeight;
 gameField.style.border = '1px solid black';
 
 let redraw = function (timeout, s) {
+    addEventListener('keydown', e => handleClick(e))
     setInterval(() => {
         g.clearRect(0, 0, gameField.width, gameField.height);
         g.fillStyle = '#F00';

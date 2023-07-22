@@ -68,15 +68,18 @@ class Game {
     }
 
     checkDeath(snake) {
-        snake.coords.forEach((coord) => {
-            if (snake.coords[0].x === coord.x && snake.coords[0].y === coord.y) {
-                return true;
-            }
-        })
+        const checkCollision = (snake, head) => {
+            return snake.coords.slice(1).some((c) => c.x === head.x && c.y === head.y);
+        }
+
+        if (checkCollision(snake, snake.head)) {
+            alert('over!');
+            return true;
+        }
         return false;
     }
 
-    moveSnake = function (snake, dir) {
+    moveSnake = function (snake, dir, field) {
         let action = {x: 0, y: 0};
         if (dir === directions.RIGHT) {
             action.x = snake.coords[0].x + s;
@@ -92,17 +95,23 @@ class Game {
             action.y = snake.coords[0].y - s;
         }
 
+        if (action.x >= field.width)
+            action.x = 0;
+        if (action.y >= field.height)
+            action.y = 0;
+        if (action.x < 0)
+            action.x = field.width - s;
+        if (action.y < 0)
+            action.y = field.height - s;
+
         snake.head = action;
         snake.coords.unshift(snake.head);
         snake.tail = snake.coords.pop();
         return snake.tail;
     }
 
-    increaseSnake (snake, dir) {
-        if (snake.coords.length > 5) {
-            console.log(snake.coords);
-        }
-        this.moveSnake(snake, dir);
+    increaseSnake (snake, dir, field) {
+        this.moveSnake(snake, dir, field);
         snake.coords.push(snake.tail);
     }
 
@@ -118,10 +127,7 @@ class Game {
         let s = 30;
 
         let g = gameField.getContext('2d');
-        addEventListener('keydown', e => {
-            handleClick(e);
-            console.log(snake);
-        })
+        addEventListener('keydown', e => handleClick(e));
 
         let drawer = new Drawer(this.width, this.height);
 
@@ -129,9 +135,9 @@ class Game {
             if (this.checkDeath(snake))
                 this.end();
             if (!this.checkApple(snake, apple))
-                this.moveSnake(snake, dir);
+                this.moveSnake(snake, dir, gameField);
             else {
-                this.increaseSnake(snake, dir);
+                this.increaseSnake(snake, dir, gameField);
                 apple = new Apple();
             }
             drawer.draw(g, snake.coords, apple);

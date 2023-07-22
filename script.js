@@ -3,20 +3,6 @@ let dir = directions.RIGHT;
 const s = 30;
 let width = 450, height = 450;
 
-// Head = last element, tail = 0 element
-let rand = function (min, max) {
-    let k = Math.floor(Math.random() * (max - min) + min);
-    return (Math.floor(k / s) * s);
-}
-
-let newApple = function () {
-    return {x: rand(0, width - s), y: rand(0, height - s)};
-}
-
-let newBody = function () {
-    return [{x: 0, y: 0}];
-}
-
 let handleClick = function (e) {
     let key = e.keyCode;
     if ([37, 38, 39, 40].indexOf(key) >= 0) e.preventDefault();
@@ -34,111 +20,122 @@ let handleClick = function (e) {
     }
 }
 
-let defineAction = function (snakeBody) {
-    let action = {x: 0, y: 0};
-    if (dir === directions.RIGHT) {
-        action.x = snakeBody[0].x + s;
-        action.y = snakeBody[0].y;
-    } else if (dir === directions.BOTTOM) {
-        action.x = snakeBody[0].x;
-        action.y = snakeBody[0].y + s;
-    } else if (dir === directions.LEFT) {
-        action.x = snakeBody[0].x - s;
-        action.y = snakeBody[0].y;
-    } else if (dir === directions.TOP) {
-        action.x = snakeBody[0].x;
-        action.y = snakeBody[0].y - s;
+let rand = function (min, max) {
+    let k = Math.floor(Math.random() * (max - min) + min);
+    return (Math.floor(k / s) * s);
+}
+
+class Snake {
+    constructor() {
+        this.coords = [{x: 0, y: 0}];
     }
 
-    return action;
-}
+    move = function (dir) {
+        let action = {x: 0, y: 0};
+        if (dir === directions.RIGHT) {
+            action.x = this.coords[0].x + s;
+            action.y = this.coords[0].y;
+        } else if (dir === directions.BOTTOM) {
+            action.x = this.coords[0].x;
+            action.y = this.coords[0].y + s;
+        } else if (dir === directions.LEFT) {
+            action.x = this.coords[0].x - s;
+            action.y = this.coords[0].y;
+        } else if (dir === directions.TOP) {
+            action.x = this.coords[0].x;
+            action.y = this.coords[0].y - s;
+        }
 
-let checkApple = function (snakeBody, apple) {
-    let temp = snakeBody.pop();
-    // checking apple and snake positions
-    if ((snakeBody[0].x === apple.x && snakeBody[0].y === apple.y)) {
-        apple = newApple();
-        snakeBody.unshift(temp);
+        this.coords.unshift(action);
+        return this.coords.pop();
     }
 
-    return apple;
-}
-let moveAndCheck = function (snakeBody, action, apple) {
-    let last = snakeBody.length - 1;
-    debugger;
-    snakeBody.forEach((el, index) => {
-        if (el.x >= width) {
-            el.x = 0;
-        } else if (el.x < 0) {
-            el.x = width;
-        }
-        if (el.y >= height) {
-            el.y = 0;
-        } else if (el.y < 0) {
-            el.y = height;
-        }
-        // fix needed
-        if (el.x === snakeBody[last].x && el.y === snakeBody[last].y && index !== last) {
-            //gameEnd();
-        }
-    })
-    // changing snake position
-    snakeBody.unshift(action);
-    apple = checkApple(snakeBody, apple);
+    increase(dir) {
+        let tail = this.move(dir);
+        this.coords.unshift(tail);
+    }
 
-    return apple;
-}
+    iterate(dir, apple) {
+        if (this.checkDeath())
+            return false;
+        if (!this.checkApple(apple))
+            this.move(dir);
+        else
+            this.increase();
+        return true;
+    }
 
-let recalculate = function (gameField, snakeBody, apple) {
-    if (snakeBody.length > 5) debugger;
-    let action = defineAction(snakeBody);
-    moveAndCheck(snakeBody, action, apple);
+    checkApple(apple) {
+        return (this.coords[0].x === apple.x && this.coords[0].y === apple.y);
+    }
+
+    checkDeath() {
+        this.coords.forEach((coord) => {
+            if (this.coords[0].x === coord.x && this.coords[0].y === coord.y) {
+                return true;
+            }
+        })
+        return false;
+    }
 }
 
-let drawApple = function (g, apple) {
-    g.fillStyle = '#F00';
-    g.fillRect(apple.x, apple.y, s, s);
+class Apple {
+    constructor() {
+        this.x = rand(0, width - s);
+        this.y = rand(0, height - s);
+    }
 }
 
-let drawSnakePart = function (g, part) {
-    g.fillRect(part.x, part.y, s, s);
+class Drawer {
+    constructor(width, height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    draw = function (g, snakeCoords, apple) {
+        g.clearRect(0, 0, width, height);
+        g.fillStyle = '#F00';
+        g.fillRect(apple.x, apple.y, s, s);
+        g.fillStyle = '#000';
+        snakeCoords.forEach(el => {
+            g.fillRect(el.x, el.y, s, s);
+        });
+    }
 }
 
-let drawSnake = function (g, snakeBody) {
-    g.fillStyle = '#000';
-    snakeBody.forEach(el => drawSnakePart(g, el, width, height));
-}
-let redraw = function (g, gameField, snakeBody, apple) {
-    g.clearRect(0, 0, width, height);
-    drawApple(g, apple);
-    drawSnake(g, snakeBody);
-}
+class Game {
+    constructor(width, height) {
+        this.width = width;
+        this.height = height;
+    }
 
-let gameStart = function (width = 450, height = 450, time = 100) {
-    let gameField = document.getElementById('snake_game');
-    this.width = width;
-    this.height = height;
-    gameField.style.border = '1px solid black';
-    gameField.width = width;
-    gameField.height = height;
+    start() {
+        let gameField = document.getElementById('snake_game');
+        gameField.style.border = '1px solid black';
+        gameField.width = width;
+        gameField.height = height;
 
-    let snakeBody = newBody();
-    let apple = newApple(gameField.width, gameField.height);
-    let timeout = time;
-    let s = 30;
+        let snake = new Snake();
+        let apple = new Apple();
+        let timeout = 100;
+        let s = 30;
 
-    let g = gameField.getContext('2d');
-    addEventListener('keydown', e => handleClick(e))
+        let g = gameField.getContext('2d');
+        addEventListener('keydown', e => handleClick(e))
 
-    setInterval(() => {
-        recalculate(gameField, snakeBody, apple);
-        redraw(g, gameField, snakeBody, apple);
-    }, timeout);
-}
+        let drawer = new Drawer(this.width, this.height);
 
-let gameEnd = function () {
-    alert('game is over!');
-    //document.getElementById('snake_game').getParent.removeChild(document.getElementById('snake_game'));
+        setInterval(() => {
+            if (!snake.iterate(dir, apple))
+                this.end();
+            drawer.draw(g, snake.coords, apple);
+        }, timeout);
+    }
+
+    end() {
+
+    }
 }
 
-gameStart();
+game = new Game(250, 450);
+game.start();

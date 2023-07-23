@@ -46,6 +46,9 @@ class Drawer {
         this.height = height;
     }
 
+    clear(g) {
+        g.clearRect(0, 0, width, height);
+    }
     draw = function (g, snakeCoords, apple) {
         g.clearRect(0, 0, width, height);
         g.fillStyle = '#F00';
@@ -72,11 +75,7 @@ class Game {
             return snake.coords.slice(1).some((c) => c.x === head.x && c.y === head.y);
         }
 
-        if (checkCollision(snake, snake.head)) {
-            alert('over!');
-            return true;
-        }
-        return false;
+        return !!checkCollision(snake, snake.head);
     }
 
     moveSnake = function (snake, dir, field) {
@@ -117,6 +116,15 @@ class Game {
 
     start() {
         let gameField = document.getElementById('snake_game');
+        if (gameField === null) {
+            let wrapper = document.getElementById("wrapper");
+            let canvas = document.createElement("canvas");
+            let results = document.getElementById("results");
+            wrapper.removeChild(results);
+            canvas.id = "snake_game";
+            wrapper.appendChild(canvas);
+            gameField = canvas;
+        }
         gameField.style.border = '1px solid black';
         gameField.width = width;
         gameField.height = height;
@@ -130,10 +138,11 @@ class Game {
         addEventListener('keydown', e => handleClick(e));
 
         let drawer = new Drawer(this.width, this.height);
+        drawer.clear(g);
 
-        setInterval(() => {
+        let gameInterval = setInterval(() => {
             if (this.checkDeath(snake))
-                this.end();
+                this.end(gameInterval, snake.coords.length);
             if (!this.checkApple(snake, apple))
                 this.moveSnake(snake, dir, gameField);
             else {
@@ -144,10 +153,23 @@ class Game {
         }, timeout);
     }
 
-    end() {
-
+    end(gameInterval, snakeLength) {
+        let canvas = document.getElementById('snake_game');
+        let wrapper = document.getElementById("wrapper");
+        let results = document.createElement("h2");
+        let startButton = document.getElementById("start");
+        startButton.style.visibility = "visible";
+        results.textContent = "Your score is " + snakeLength + "!";
+        results.id = "results";
+        wrapper.removeChild(canvas);
+        wrapper.appendChild(results);
+        clearInterval(gameInterval);
     }
 }
 
-game = new Game(450, 450);
-game.start();
+function start() {
+    let game = new Game(450, 450);
+    game.start();
+    let startButton = document.getElementById("start");
+    startButton.style.visibility = 'hidden';
+}
